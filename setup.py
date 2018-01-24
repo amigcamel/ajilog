@@ -12,4 +12,6 @@ if __name__ == '__main__':
         packages=find_packages(),
         install_requires=external_modules,
         description='Wrapper for colorlog for better use.',
+        author='Aji Liu',
+        author_email='amigcamel@gmail.com',
     )
