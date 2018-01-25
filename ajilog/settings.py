@@ -5,7 +5,7 @@ import inspect
 from colorlog import ColoredFormatter
 
 
-class _Logger(dict):
+class _Logger():
     """Logger object."""
 
     formatter = ColoredFormatter(
@@ -33,6 +33,10 @@ class _Logger(dict):
     def __getattr__(self, name):
         """Get attribute of self."""
         return getattr(self._log, name)
+
+    def __repr__(self):
+        """Make human-readable."""
+        return str(self._loggers)
 
     @property
     def _log(self):
