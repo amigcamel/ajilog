@@ -27,8 +27,8 @@ class _Logger(dict):
     )
 
     def __init__(self):
-        """Access dict key like an attribute."""
-        self.__dict__ = self
+        """Create dict to store loggers."""
+        self._loggers = {}
 
     def __getattr__(self, name):
         """Get attribute of self."""
@@ -42,8 +42,8 @@ class _Logger(dict):
         )
         name = filename.split('/')[-1].split('.py')[0]
 
-        if self.get(name):
-            return self.get(name)
+        if self._loggers.get(name):
+            return self._loggers.get(name)
 
         logger = logging.getLogger(name)
         logger.setLevel(logging.DEBUG)
@@ -55,7 +55,7 @@ class _Logger(dict):
 
         # Add handlers
         logger.addHandler(sh)
-        self[name] = logger
+        self._loggers[name] = logger
         return logger
 
 
