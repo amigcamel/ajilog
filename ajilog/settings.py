@@ -34,6 +34,12 @@ class _Logger():
         """Get attribute of self."""
         return getattr(self._log, name)
 
+    def __setattr__(self, name, val):
+        if name == 'name':
+            setattr(self._log, name, val)
+        else:
+            super().__setattr__(name, val)
+
     def __repr__(self):
         """Make human-readable."""
         return str(self._loggers)
@@ -42,10 +48,9 @@ class _Logger():
     def _log(self):
 
         filename, *_ = inspect.getframeinfo(
-            inspect.currentframe().f_back.f_back
+            inspect.currentframe().f_back.f_back.f_back
         )
         name = filename.split('/')[-1].split('.py')[0]
-
         if self._loggers.get(name):
             return self._loggers.get(name)
 
