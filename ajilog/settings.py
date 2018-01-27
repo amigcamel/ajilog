@@ -60,7 +60,10 @@ class _Logger():
     @property
     def filename(self):
         filepath = getfile(currentframe().f_back.f_back)
-        return filepath.split('/')[-1].replace('.py', '')
+        fname = filepath.split('/')[-1].replace('.py', '')
+        if 'ipython-input-' in fname:
+            fname = 'ipython-input'
+        return fname
 
 
 logger = _Logger()
