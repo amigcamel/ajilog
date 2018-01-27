@@ -26,17 +26,21 @@ class _Logger():
         }
     )
 
+    name = None
+
     def __init__(self):
         """Create dict to store loggers."""
         self._loggers = {}
 
     def __getattr__(self, name):
         """Get attribute of self."""
-        filename = self.filename
-        if self._loggers.get(filename):
-            logger = self._loggers.get(filename)
+        logger_name = self.name or self.filename
+        if name == 'name':
+            return logger_name
+        if self._loggers.get(logger_name):
+            logger = self._loggers.get(logger_name)
         else:
-            logger = logging.getLogger(filename)
+            logger = logging.getLogger(logger_name)
             logger.setLevel(logging.DEBUG)
 
             # StreamHandler
@@ -46,14 +50,8 @@ class _Logger():
 
             # Add handlers
             logger.addHandler(sh)
-            self._loggers[filename] = logger
+            self._loggers[logger_name] = logger
         return getattr(logger, name)
-
-    def __setattr__(self, name, val):
-        if name == 'name':
-            self._loggers[self.filename].name = val
-        else:
-            super().__setattr__(name, val)
 
     def __repr__(self):
         """Make human-readable."""
@@ -63,5 +61,6 @@ class _Logger():
     def filename(self):
         filepath = getfile(currentframe().f_back.f_back)
         return filepath.split('/')[-1].replace('.py', '')
+
 
 logger = _Logger()
