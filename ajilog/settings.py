@@ -32,12 +32,11 @@ class _Logger():
 
     def __getattr__(self, name):
         """Get attribute of self."""
-        filepath = getfile(currentframe().f_back)
-        logger_name = filepath.split('/')[-1].replace('.py', '')
-        if self._loggers.get(logger_name):
-            logger = self._loggers.get(logger_name)
+        filename = self.filename
+        if self._loggers.get(filename):
+            logger = self._loggers.get(filename)
         else:
-            logger = logging.getLogger(logger_name)
+            logger = logging.getLogger(filename)
             logger.setLevel(logging.DEBUG)
 
             # StreamHandler
@@ -47,12 +46,12 @@ class _Logger():
 
             # Add handlers
             logger.addHandler(sh)
-            self._loggers[logger_name] = logger
+            self._loggers[filename] = logger
         return getattr(logger, name)
 
     def __setattr__(self, name, val):
         if name == 'name':
-            setattr(self._log, name, val)
+            self._loggers[self.filename].name = val
         else:
             super().__setattr__(name, val)
 
@@ -60,5 +59,9 @@ class _Logger():
         """Make human-readable."""
         return str(self._loggers)
 
+    @property
+    def filename(self):
+        filepath = getfile(currentframe().f_back.f_back)
+        return filepath.split('/')[-1].replace('.py', '')
 
 logger = _Logger()
