@@ -65,5 +65,10 @@ class _Logger():
             fname = 'ipython-input'
         return fname
 
+    def replace_print(self, log_level='debug'):
+        """Replace built-in `print` function with logger."""
+        import builtins
+        builtins.print = getattr(self, log_level)
+
 
 logger = _Logger()
