@@ -1,6 +1,6 @@
 """Logging configurations."""
+from inspect import currentframe, getfile
 import logging
-import inspect
 
 from colorlog import ColoredFormatter
 
@@ -32,7 +32,23 @@ class _Logger():
 
     def __getattr__(self, name):
         """Get attribute of self."""
-        return getattr(self._log, name)
+        filepath = getfile(currentframe().f_back)
+        logger_name = filepath.split('/')[-1].replace('.py', '')
+        if self._loggers.get(logger_name):
+            logger = self._loggers.get(logger_name)
+        else:
+            logger = logging.getLogger(logger_name)
+            logger.setLevel(logging.DEBUG)
+
+            # StreamHandler
+            sh = logging.StreamHandler()
+            sh.setLevel(logging.DEBUG)
+            sh.setFormatter(self.formatter)
+
+            # Add handlers
+            logger.addHandler(sh)
+            self._loggers[logger_name] = logger
+        return getattr(logger, name)
 
     def __setattr__(self, name, val):
         if name == 'name':
@@ -43,29 +59,6 @@ class _Logger():
     def __repr__(self):
         """Make human-readable."""
         return str(self._loggers)
-
-    @property
-    def _log(self):
-
-        filename, *_ = inspect.getframeinfo(
-            inspect.currentframe().f_back.f_back.f_back
-        )
-        name = filename.split('/')[-1].split('.py')[0]
-        if self._loggers.get(name):
-            return self._loggers.get(name)
-
-        logger = logging.getLogger(name)
-        logger.setLevel(logging.DEBUG)
-
-        # StreamHandler
-        sh = logging.StreamHandler()
-        sh.setLevel(logging.DEBUG)
-        sh.setFormatter(self.formatter)
-
-        # Add handlers
-        logger.addHandler(sh)
-        self._loggers[name] = logger
-        return logger
 
 
 logger = _Logger()
