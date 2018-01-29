@@ -3,6 +3,7 @@ from setuptools import setup, find_packages
 
 external_modules = [
     'colorlog==3.1.0',
+    'six==1.11.0',
 ]
 
 if __name__ == '__main__':

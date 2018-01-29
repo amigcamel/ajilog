@@ -68,7 +68,7 @@ class _Logger():
 
     def replace_print(self, log_level='debug'):
         """Replace built-in `print` function with logger."""
-        import builtins
+        from six.moves import builtins
         builtins.print = getattr(self, log_level)
 
 
