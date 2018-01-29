@@ -27,8 +27,9 @@ class _Logger():
     )
 
     name = None
+    stream = None
 
-    def __init__(self):
+    def __init__(self, stream=None):
         """Create dict to store loggers."""
         self._loggers = {}
 
@@ -44,7 +45,7 @@ class _Logger():
             logger.setLevel(logging.DEBUG)
 
             # StreamHandler
-            sh = logging.StreamHandler()
+            sh = logging.StreamHandler(self.stream)
             sh.setLevel(logging.DEBUG)
             sh.setFormatter(self.formatter)
 
