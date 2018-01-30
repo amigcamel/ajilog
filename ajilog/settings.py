@@ -31,7 +31,7 @@ class _Logger():
 
     def __init__(self, stream=None):
         """Create dict to store loggers."""
-        self._loggers = {}
+        self._loggers = logging.Logger.manager.loggerDict
 
     def __getattr__(self, name):
         """Get attribute of self."""
