@@ -8,7 +8,19 @@ from colorlog import ColoredFormatter
 class _Logger():
     """Logger object."""
 
-    formatter = ColoredFormatter(
+    datefmt = '%y-%m-%d %H:%M:%S'
+    formatter = logging.Formatter(
+        (
+            '%(levelname)-5s '
+            '[%(asctime)s] '
+            '%(name)s %(funcName)s '
+            ':%(lineno)d '
+            '%(message)s'
+        ),
+        datefmt=datefmt,
+    )
+
+    colored_formatter = ColoredFormatter(
         (
             '%(log_color)s%(levelname)-5s%(reset)s '
             '%(yellow)s[%(asctime)s]%(reset)s%(white)s '
@@ -16,7 +28,7 @@ class _Logger():
             '%(bold_purple)s:%(lineno)d%(reset)s '
             '%(log_color)s%(message)s%(reset)s'
         ),
-        datefmt='%y-%m-%d %H:%M:%S',
+        datefmt=datefmt,
         log_colors={
             'DEBUG': 'blue',
             'INFO': 'bold_cyan',
@@ -28,6 +40,7 @@ class _Logger():
 
     name = None
     stream = None
+    use_color = True
 
     def __init__(self, stream=None):
         """Create dict to store loggers."""
@@ -47,7 +60,8 @@ class _Logger():
             # StreamHandler
             sh = logging.StreamHandler(self.stream)
             sh.setLevel(logging.DEBUG)
-            sh.setFormatter(self.formatter)
+            sh.setFormatter(
+                self.colored_formatter if self.use_color else self.formatter)
 
             # Add handlers
             logger.addHandler(sh)
