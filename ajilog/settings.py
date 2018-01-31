@@ -53,8 +53,10 @@ class _Logger():
         self.use_rotate = True
         self.rotate_level = 'DEBUG'
         self.rotate_path = join(
-            '/tmp/logs', dirname(self.get_current_file('name')).split('/')[-1])
-        print(self.rotate_path)
+            '/tmp/logs',
+            dirname(self.get_current_file('path').split('/')[-1]),
+            self.get_current_file('path').split('/')[-1].split('.py')[0],
+        )
 
         # check if rotate_path dir exists
         if self.use_rotate and (not isdir(self.rotate_path)):
@@ -112,7 +114,10 @@ class _Logger():
         if '_pytest' in filepath:
             filepath = getfile(frame.f_back)
 
-        return filepath.split('/')[-1].split('.py')[0]
+        if target == 'path':
+            return filepath
+        elif target == 'name':
+            return filepath.split('/')[-1].split('.py')[0]
 
 
 logger = _Logger()
