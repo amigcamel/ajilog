@@ -11,7 +11,7 @@ def test_with_color():
 
 def test_without_color():
     """Test if color not displays."""
-    logger._loggers.pop(logger.filename)
+    logger._loggers.pop(logger.get_current_file('name'))
     logger.use_color = False
     logger.stream.truncate(0)
     logger.debug(u'')

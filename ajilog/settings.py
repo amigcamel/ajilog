@@ -53,7 +53,7 @@ class _Logger():
         self.use_rotate = True
         self.rotate_level = 'DEBUG'
         self.rotate_path = join(
-            '/tmp/logs', dirname(self.filename).split('/')[-1])
+            '/tmp/logs', dirname(self.get_current_file('name')).split('/')[-1])
         print(self.rotate_path)
 
         # check if rotate_path dir exists
@@ -62,7 +62,7 @@ class _Logger():
 
     def __getattr__(self, name):
         """Get attribute of self."""
-        logger_name = self.name or self.filename
+        logger_name = self.name or self.get_current_file('name')
         if name == 'name':
             return logger_name
         if self._loggers.get(logger_name):
@@ -97,14 +97,21 @@ class _Logger():
         """Make human-readable."""
         return str(self._loggers)
 
-    @property
-    def filename(self):
+    def get_current_file(self, target):
+        """Get current file info.
+
+        parameters:
+        - target: 'name' or 'path'
+
+        """
+        assert target in ('name', 'path')
         frame = currentframe()
         filepath = getfile(frame.f_back.f_back)
         if 'ipython-input-' in filepath:
             filepath = getfile(frame.f_back.f_back.f_back)
         if '_pytest' in filepath:
             filepath = getfile(frame.f_back)
+
         return filepath.split('/')[-1].split('.py')[0]
 
 
