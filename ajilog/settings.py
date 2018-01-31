@@ -1,5 +1,8 @@
 """Logging configurations."""
 from inspect import currentframe, getfile
+from os.path import join, isdir, dirname
+from os import mkdir
+from logging.handlers import TimedRotatingFileHandler
 import logging
 
 from colorlog import ColoredFormatter
@@ -46,6 +49,17 @@ class _Logger():
         """Create dict to store loggers."""
         self._loggers = logging.Logger.manager.loggerDict
 
+        # TimedRotatingFileHandler
+        self.use_rotate = True
+        self.rotate_level = 'DEBUG'
+        self.rotate_path = join(
+            '/tmp/logs', dirname(self.filename).split('/')[-1])
+        print(self.rotate_path)
+
+        # check if rotate_path dir exists
+        if self.use_rotate and (not isdir(self.rotate_path)):
+            mkdir(self.rotate_path)
+
     def __getattr__(self, name):
         """Get attribute of self."""
         logger_name = self.name or self.filename
@@ -62,9 +76,20 @@ class _Logger():
             sh.setLevel(logging.DEBUG)
             sh.setFormatter(
                 self.colored_formatter if self.use_color else self.formatter)
-
-            # Add handlers
             logger.addHandler(sh)
+
+            # TimedRotatingFileHandler
+            if self.use_rotate:
+                TimedRotatingFileHandler
+                fh = TimedRotatingFileHandler(
+                    join(self.rotate_path, logger_name),
+                    when='midnight',
+                    backupCount=7
+                )
+                fh.setLevel(logging.DEBUG)
+                fh.setFormatter(self.formatter)
+                logger.addHandler(fh)
+
             self._loggers[logger_name] = logger
         return getattr(logger, name)
 
@@ -80,8 +105,7 @@ class _Logger():
             filepath = getfile(frame.f_back.f_back.f_back)
         if '_pytest' in filepath:
             filepath = getfile(frame.f_back)
-        fname = filepath.split('/')[-1].replace('.py', '')
-        return fname
+        return filepath.split('/')[-1].split('.py')[0]
 
 
 logger = _Logger()
