@@ -1,7 +1,5 @@
-from os.path import join, abspath, dirname
-import sys
+from io import StringIO
 
-ROOT = join(dirname(dirname(abspath(__file__))))
-sys.path.insert(0, ROOT)
+from ajilog import logger
 
-print(ROOT)
+logger.stream = StringIO()
