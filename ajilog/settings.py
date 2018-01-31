@@ -74,10 +74,13 @@ class _Logger():
 
     @property
     def filename(self):
-        filepath = getfile(currentframe().f_back.f_back)
+        frame = currentframe()
+        filepath = getfile(frame.f_back.f_back)
+        if 'ipython-input-' in filepath:
+            filepath = getfile(frame.f_back.f_back.f_back)
+        if '_pytest' in filepath:
+            filepath = getfile(frame.f_back)
         fname = filepath.split('/')[-1].replace('.py', '')
-        if 'ipython-input-' in fname:
-            fname = 'ipython-input'
         return fname
 
 
