@@ -41,59 +41,58 @@ class _Logger():
         }
     )
 
-    name = None
     stream = None
     use_color = True
 
     def __init__(self, stream=None):
         """Create dict to store loggers."""
+        logging.getLogger().setLevel(logging.DEBUG)
         self._loggers = logging.Logger.manager.loggerDict
-
-        # TimedRotatingFileHandler
-        self.use_rotate = True
-        self.rotate_level = 'DEBUG'
-        self.rotate_path = join(
-            '/tmp/logs',
-            dirname(self.get_current_file('path').split('/')[-1]),
-            self.get_current_file('path').split('/')[-1].split('.py')[0],
-        )
-
-        # check if rotate_path dir exists
-        if self.use_rotate and (not isdir(self.rotate_path)):
-            mkdir(self.rotate_path)
+        self._loggers.clear()  # clear all existed loggers
 
     def __getattr__(self, name):
         """Get attribute of self."""
-        logger_name = self.name or self.get_current_file('name')
-        if name == 'name':
-            return logger_name
-        if self._loggers.get(logger_name):
-            logger = self._loggers.get(logger_name)
-        else:
-            logger = logging.getLogger(logger_name)
-            logger.setLevel(logging.DEBUG)
+        logger_name = self.get_current_file('name')
+        # print('try to find logger: ', logger_name)
+        if not self._loggers.get(logger_name):
+            # print('logger ', logger_name, 'not found, now set_stream')
+            self.set_stream()
+            # print('loggerDict: ', logging.Logger.manager.loggerDict)
+        return getattr(self._loggers[logger_name], name)
 
-            # StreamHandler
-            sh = logging.StreamHandler(self.stream)
-            sh.setLevel(logging.DEBUG)
-            sh.setFormatter(
-                self.colored_formatter if self.use_color else self.formatter)
-            logger.addHandler(sh)
+    def set_stream(self):
+        """Set formatter and add handlers."""
+        logger_name = self.get_current_file('name')
+        _logger = logging.getLogger(logger_name)
+        _logger.setLevel(logging.DEBUG)
 
-            # TimedRotatingFileHandler
-            if self.use_rotate:
-                TimedRotatingFileHandler
-                fh = TimedRotatingFileHandler(
-                    join(self.rotate_path, logger_name),
-                    when='midnight',
-                    backupCount=7
-                )
-                fh.setLevel(logging.DEBUG)
-                fh.setFormatter(self.formatter)
-                logger.addHandler(fh)
+        sh = logging.StreamHandler(self.stream)
+        sh.setLevel(logging.DEBUG)
+        sh.setFormatter(
+            self.colored_formatter if self.use_color else self.formatter)
+        _logger.addHandler(sh)
 
-            self._loggers[logger_name] = logger
-        return getattr(logger, name)
+    def set_rotate(self, log_level='DEBUG', log_dir=None):
+        """Use TimedRotatingFileHandler."""
+        logger_name = self.get_current_file('name')
+        if not log_dir:
+            log_dir = join(
+                '/tmp/logs',
+                dirname(self.get_current_file('path').split('/')[-1]),
+                self.get_current_file('path').split('/')[-1].split('.py')[0],
+            )
+        # check if log_dir exists
+        if not isdir(log_dir):
+            mkdir(log_dir)
+
+        fh = TimedRotatingFileHandler(
+            join(log_dir, logger_name),
+            when='midnight',
+            backupCount=7
+        )
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(self.formatter)
+        logging.getLogger(logger_name).addHandler(fh)
 
     def __repr__(self):
         """Make human-readable."""
@@ -108,12 +107,16 @@ class _Logger():
         """
         assert target in ('name', 'path')
         frame = currentframe()
-        filepath = getfile(frame.f_back.f_back)
-        if 'ipython-input-' in filepath:
-            filepath = getfile(frame.f_back.f_back.f_back)
-        if '_pytest' in filepath:
-            filepath = getfile(frame.f_back)
-
+        while True:
+            filepath = getfile(frame)
+            if __file__ == filepath:
+                frame = frame.f_back
+            elif 'ipython-input-' in filepath:
+                filepath = getfile(frame.f_back)
+                break
+            else:
+                break
+        # print('----------', filepath, '-------------')
         if target == 'path':
             return filepath
         elif target == 'name':
