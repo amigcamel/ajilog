@@ -1,6 +1,6 @@
 """Logging configurations."""
 from inspect import currentframe, getfile
-from os.path import join, isdir, dirname
+from os.path import join, exists
 from os import mkdir
 from logging.handlers import TimedRotatingFileHandler
 import logging
@@ -43,6 +43,7 @@ class _Logger():
 
     stream = None
     use_color = True
+    use_rotate = False
 
     def __init__(self, stream=None):
         """Create dict to store loggers."""
@@ -57,6 +58,8 @@ class _Logger():
         if not self._loggers.get(logger_name):
             # print('logger ', logger_name, 'not found, now set_stream')
             self.set_stream()
+            if self.use_rotate:
+                self.set_rotate()
             # print('loggerDict: ', logging.Logger.manager.loggerDict)
         return getattr(self._loggers[logger_name], name)
 
@@ -72,19 +75,12 @@ class _Logger():
             self.colored_formatter if self.use_color else self.formatter)
         _logger.addHandler(sh)
 
-    def set_rotate(self, log_level='DEBUG', log_dir=None):
+    def set_rotate(self, log_level='DEBUG', log_dir='/tmp/logs'):
         """Use TimedRotatingFileHandler."""
         logger_name = self.get_current_file('name')
-        if not log_dir:
-            log_dir = join(
-                '/tmp/logs',
-                dirname(self.get_current_file('path').split('/')[-1]),
-                self.get_current_file('path').split('/')[-1].split('.py')[0],
-            )
-        # check if log_dir exists
-        if not isdir(log_dir):
+        if not exists(log_dir):
             mkdir(log_dir)
-
+        # check if log_dir exists
         fh = TimedRotatingFileHandler(
             join(log_dir, logger_name),
             when='midnight',
@@ -92,6 +88,7 @@ class _Logger():
         )
         fh.setLevel(logging.DEBUG)
         fh.setFormatter(self.formatter)
+        # print('logger_name: ', logger_name)
         logging.getLogger(logger_name).addHandler(fh)
 
     def __repr__(self):
