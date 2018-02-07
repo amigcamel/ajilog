@@ -7,6 +7,8 @@ import logging
 
 from colorlog import ColoredFormatter
 
+from . import settings
+
 
 class _Logger():
     """Logger object."""
@@ -43,7 +45,6 @@ class _Logger():
 
     stream = None
     use_color = True
-    use_rotate = False
 
     def __init__(self, stream=None):
         """Create dict to store loggers."""
@@ -58,7 +59,7 @@ class _Logger():
         if not self._loggers.get(logger_name):
             # print('logger ', logger_name, 'not found, now set_stream')
             self.set_stream()
-            if self.use_rotate:
+            if settings.USE_ROTATE:
                 self.set_rotate()
             # print('loggerDict: ', logging.Logger.manager.loggerDict)
         return getattr(self._loggers[logger_name], name)

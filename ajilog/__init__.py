@@ -1,1 +1,1 @@
-from .settings import logger
+from .core import logger
