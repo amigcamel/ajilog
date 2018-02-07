@@ -2,4 +2,7 @@
 import os
 from distutils.util import strtobool
 
-USE_ROTATE = strtobool(os.environ.get('AJILOG_USE_ROTATE', 'False'))
+
+ROTATE_ENABLE = strtobool(os.environ.get('ROTATE_ENABLE', 'False'))
+ROTATE_LEVEL = os.environ.get('ROTATE_LEVEL')
+ROTATE_DIR = os.environ.get("ROTATE_DIR")

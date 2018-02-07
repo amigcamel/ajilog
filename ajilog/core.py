@@ -59,7 +59,7 @@ class _Logger():
         if not self._loggers.get(logger_name):
             # print('logger ', logger_name, 'not found, now set_stream')
             self.set_stream()
-            if settings.USE_ROTATE:
+            if settings.ROTATE_ENABLE:
                 self.set_rotate()
             # print('loggerDict: ', logging.Logger.manager.loggerDict)
         return getattr(self._loggers[logger_name], name)
@@ -76,7 +76,9 @@ class _Logger():
             self.colored_formatter if self.use_color else self.formatter)
         _logger.addHandler(sh)
 
-    def set_rotate(self, log_level='DEBUG', log_dir='/tmp/logs'):
+    def set_rotate(self,
+                   log_level=settings.ROTATE_LEVEL or 'DEBUG',
+                   log_dir=settings.ROTATE_DIR or '/tmp/logs'):
         """Use TimedRotatingFileHandler."""
         logger_name = self.get_current_file('name')
         if not exists(log_dir):
@@ -87,7 +89,7 @@ class _Logger():
             when='midnight',
             backupCount=7
         )
-        fh.setLevel(logging.DEBUG)
+        fh.setLevel(log_level)
         fh.setFormatter(self.formatter)
         # print('logger_name: ', logger_name)
         logging.getLogger(logger_name).addHandler(fh)
