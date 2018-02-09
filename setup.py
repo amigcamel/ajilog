@@ -8,7 +8,7 @@ external_modules = [
 if __name__ == '__main__':
     setup(
         name='ajilog',
-        version='0.0.0',
+        version='develop',
         packages=find_packages(),
         install_requires=external_modules,
         description='Wrapper for colorlog for better use.',
