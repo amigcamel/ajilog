@@ -76,10 +76,10 @@ class _Logger():
             self.colored_formatter if self.use_color else self.formatter)
         _logger.addHandler(sh)
 
-    def set_rotate(self,
-                   log_level=settings.ROTATE_LEVEL or 'DEBUG',
-                   log_dir=settings.ROTATE_DIR or '/tmp/logs'):
+    def set_rotate(self, log_level=None, log_dir=None):
         """Use TimedRotatingFileHandler."""
+        log_level = settings.ROTATE_LEVEL or 'DEBUG'
+        log_dir = settings.ROTATE_DIR or '/tmp/logs'
         logger_name = self.get_current_file('name')
         if not exists(log_dir):
             mkdir(log_dir)
