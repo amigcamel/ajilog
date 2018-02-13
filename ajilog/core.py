@@ -106,7 +106,9 @@ class _Logger():
                 break
             else:
                 break
-        return frame.f_globals['__name__']
+        logger_name = frame.f_globals.get('__loggername__')
+        logger_name = logger_name or frame.f_globals['__name__']
+        return logger_name
 
 
 logger = _Logger()
