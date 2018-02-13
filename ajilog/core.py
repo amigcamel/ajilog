@@ -120,7 +120,7 @@ class _Logger():
         if target == 'path':
             return filepath
         elif target == 'name':
-            return filepath.split('/')[-1].split('.py')[0]
+            return frame.f_globals['__name__']
 
 
 logger = _Logger()
