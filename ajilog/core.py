@@ -54,19 +54,16 @@ class _Logger():
 
     def __getattr__(self, name):
         """Get attribute of self."""
-        logger_name = self.get_current_file('name')
-        # print('try to find logger: ', logger_name)
+        logger_name = self.get_current_name()
         if not self._loggers.get(logger_name):
-            # print('logger ', logger_name, 'not found, now set_stream')
             self.set_stream()
             if settings.ROTATE_ENABLE:
                 self.set_rotate()
-            # print('loggerDict: ', logging.Logger.manager.loggerDict)
         return getattr(self._loggers[logger_name], name)
 
     def set_stream(self):
         """Set formatter and add handlers."""
-        logger_name = self.get_current_file('name')
+        logger_name = self.get_current_name()
         _logger = logging.getLogger(logger_name)
         _logger.setLevel(logging.DEBUG)
 
@@ -80,7 +77,7 @@ class _Logger():
         """Use TimedRotatingFileHandler."""
         log_level = settings.ROTATE_LEVEL or 'DEBUG'
         log_dir = settings.ROTATE_DIR or '/tmp/logs'
-        logger_name = self.get_current_file('name')
+        logger_name = self.get_current_name()
         if not exists(log_dir):
             mkdir(log_dir)
         # check if log_dir exists
@@ -91,21 +88,14 @@ class _Logger():
         )
         fh.setLevel(log_level)
         fh.setFormatter(self.formatter)
-        # print('logger_name: ', logger_name)
         logging.getLogger(logger_name).addHandler(fh)
 
     def __repr__(self):
         """Make human-readable."""
         return str(self._loggers)
 
-    def get_current_file(self, target):
-        """Get current file info.
-
-        parameters:
-        - target: 'name' or 'path'
-
-        """
-        assert target in ('name', 'path')
+    def get_current_name(self):
+        """Get current file info."""
         frame = currentframe()
         while True:
             filepath = getfile(frame)
@@ -116,11 +106,7 @@ class _Logger():
                 break
             else:
                 break
-        # print('----------', filepath, '-------------')
-        if target == 'path':
-            return filepath
-        elif target == 'name':
-            return frame.f_globals['__name__']
+        return frame.f_globals['__name__']
 
 
 logger = _Logger()
