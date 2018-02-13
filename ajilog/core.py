@@ -101,9 +101,6 @@ class _Logger():
             filepath = getfile(frame)
             if __file__ == filepath:
                 frame = frame.f_back
-            elif 'ipython-input-' in filepath:
-                filepath = getfile(frame.f_back)
-                break
             else:
                 break
         logger_name = frame.f_globals.get('__loggername__')
