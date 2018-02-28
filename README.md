@@ -29,3 +29,12 @@
     logger.warning('WARNING')
     logger.error('ERROR')
     logger.critical('CRITICAL')
+
+## Custom settings
+
+Add `ajilog.conf` to your project:
+
+    [rotate]
+    enable = true
+    level  = debug
+    dir    = /tmp/ajilog
