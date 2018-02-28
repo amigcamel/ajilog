@@ -1,8 +1,6 @@
 """Logging configurations."""
 from inspect import currentframe, getfile
-from os.path import join, exists
-from distutils import dir_util
-from tempfile import gettempdir
+from os.path import join
 from logging.handlers import TimedRotatingFileHandler
 import logging
 
@@ -74,22 +72,16 @@ class _Logger():
             self.colored_formatter if self.use_color else self.formatter)
         _logger.addHandler(sh)
 
-    def set_rotate(self, log_level=None, log_dir=None):
+    def set_rotate(self):
         """Use TimedRotatingFileHandler."""
         logger_name = self.get_current_name()
-        dir_name = logger_name.split('.')[0]
-        log_level = settings.ROTATE_LEVEL or 'DEBUG'
-        log_dir = (settings.ROTATE_DIR or
-                   join(gettempdir(), 'logs', dir_name))
-        if not exists(log_dir):
-            dir_util.mkpath(log_dir)
         # check if log_dir exists
         fh = TimedRotatingFileHandler(
-            join(log_dir, logger_name),
+            join(settings.ROTATE_DIR, logger_name),
             when='midnight',
             backupCount=7
         )
-        fh.setLevel(log_level)
+        fh.setLevel(settings.ROTATE_LEVEL)
         fh.setFormatter(self.formatter)
         logging.getLogger(logger_name).addHandler(fh)
 

@@ -1,8 +1,15 @@
 """Settings."""
-import os
 from distutils.util import strtobool
+from configparser import ConfigParser
+from distutils import dir_util
+from os.path import exists, join
+from tempfile import gettempdir
 
-
-ROTATE_ENABLE = strtobool(os.environ.get('ROTATE_ENABLE', 'False'))
-ROTATE_LEVEL = os.environ.get('ROTATE_LEVEL')
-ROTATE_DIR = os.environ.get("ROTATE_DIR")
+config = ConfigParser()
+config.read('ajilog.conf')
+ROTATE_ENABLE = strtobool(config.get('rotate', 'enable', fallback='false'))
+ROTATE_LEVEL = config.get('rotate', 'level', fallback='debug').upper()
+ROTATE_DIR = config.get('rotate', 'dir', fallback=join(gettempdir(), 'logs'))
+if not exists(ROTATE_DIR):
+    dir_util.mkpath(ROTATE_DIR)
+    print('rotating dir created: %s' % ROTATE_DIR)

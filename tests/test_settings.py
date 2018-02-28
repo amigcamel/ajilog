@@ -1,5 +1,4 @@
 """Test settings."""
-import os
 from uuid import uuid4
 from os.path import isdir, join
 from tempfile import gettempdir
@@ -12,14 +11,15 @@ from .conf import import_ajilog
 
 def test_settings(monkeypatch):
     """Test rotate-related settings."""
-    monkeypatch.setenv('ROTATE_ENABLE', 'true')
-    monkeypatch.setenv('ROTATE_DIR', join(gettempdir(), uuid4().hex))
-    monkeypatch.setenv('ROTATE_LEVEL', 'DEBUG')
-
     ajilog = import_ajilog()
 
     reload_module(ajilog.settings)
 
+    monkeypatch.setitem(ajilog.settings.config['rotate'], 'enable', 'true')
+    monkeypatch.setitem(ajilog.settings.config['rotate'],
+                        'dir', join(gettempdir(), uuid4().hex))
+    monkeypatch.setitem(ajilog.settings.config['rotate'], 'level', 'debug')
+
     ajilog.logger.debug(u'')
-    assert isdir(os.environ['ROTATE_DIR'])
-    rmtree(os.environ['ROTATE_DIR'])
+    assert isdir(ajilog.settings.ROTATE_DIR)
+    rmtree(ajilog.settings.ROTATE_DIR)
