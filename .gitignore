@@ -161,3 +161,4 @@ tags
 # End of https://www.gitignore.io/api/vim,osx,linux,python
 
 .envrc
+ajilog.conf
