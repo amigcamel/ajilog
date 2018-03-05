@@ -1,7 +1,6 @@
 """Logging configurations."""
 from inspect import currentframe, getfile
-from os.path import join, exists
-from os import mkdir
+from os.path import join
 from logging.handlers import TimedRotatingFileHandler
 import logging
 
@@ -54,19 +53,16 @@ class _Logger():
 
     def __getattr__(self, name):
         """Get attribute of self."""
-        logger_name = self.get_current_file('name')
-        # print('try to find logger: ', logger_name)
+        logger_name = self.get_current_name()
         if not self._loggers.get(logger_name):
-            # print('logger ', logger_name, 'not found, now set_stream')
             self.set_stream()
             if settings.ROTATE_ENABLE:
                 self.set_rotate()
-            # print('loggerDict: ', logging.Logger.manager.loggerDict)
         return getattr(self._loggers[logger_name], name)
 
     def set_stream(self):
         """Set formatter and add handlers."""
-        logger_name = self.get_current_file('name')
+        logger_name = self.get_current_name()
         _logger = logging.getLogger(logger_name)
         _logger.setLevel(logging.DEBUG)
 
@@ -76,51 +72,35 @@ class _Logger():
             self.colored_formatter if self.use_color else self.formatter)
         _logger.addHandler(sh)
 
-    def set_rotate(self, log_level=None, log_dir=None):
+    def set_rotate(self):
         """Use TimedRotatingFileHandler."""
-        log_level = settings.ROTATE_LEVEL or 'DEBUG'
-        log_dir = settings.ROTATE_DIR or '/tmp/logs'
-        logger_name = self.get_current_file('name')
-        if not exists(log_dir):
-            mkdir(log_dir)
+        logger_name = self.get_current_name()
         # check if log_dir exists
         fh = TimedRotatingFileHandler(
-            join(log_dir, logger_name),
+            join(settings.ROTATE_DIR, logger_name),
             when='midnight',
             backupCount=7
         )
-        fh.setLevel(log_level)
+        fh.setLevel(settings.ROTATE_LEVEL)
         fh.setFormatter(self.formatter)
-        # print('logger_name: ', logger_name)
         logging.getLogger(logger_name).addHandler(fh)
 
     def __repr__(self):
         """Make human-readable."""
         return str(self._loggers)
 
-    def get_current_file(self, target):
-        """Get current file info.
-
-        parameters:
-        - target: 'name' or 'path'
-
-        """
-        assert target in ('name', 'path')
+    def get_current_name(self):
+        """Get current file info."""
         frame = currentframe()
         while True:
             filepath = getfile(frame)
             if __file__ == filepath:
                 frame = frame.f_back
-            elif 'ipython-input-' in filepath:
-                filepath = getfile(frame.f_back)
-                break
             else:
                 break
-        # print('----------', filepath, '-------------')
-        if target == 'path':
-            return filepath
-        elif target == 'name':
-            return filepath.split('/')[-1].split('.py')[0]
+        logger_name = frame.f_globals.get('__loggername__')
+        logger_name = logger_name or frame.f_globals['__name__']
+        return logger_name
 
 
 logger = _Logger()
