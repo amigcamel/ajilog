@@ -43,7 +43,6 @@ class _Logger():
     )
 
     stream = None
-    use_color = True
 
     def __init__(self, stream=None):
         """Create dict to store loggers."""
@@ -64,12 +63,12 @@ class _Logger():
         """Set formatter and add handlers."""
         logger_name = self.get_current_name()
         _logger = logging.getLogger(logger_name)
-        _logger.setLevel(logging.DEBUG)
 
         sh = logging.StreamHandler(self.stream)
-        sh.setLevel(logging.DEBUG)
-        sh.setFormatter(
-            self.colored_formatter if self.use_color else self.formatter)
+        sh.setLevel(settings.STREAM_LEVEL)
+        sh.setFormatter(self.colored_formatter
+                        if settings.STREAM_COLOR
+                        else self.formatter)
         _logger.addHandler(sh)
 
     def set_rotate(self):
