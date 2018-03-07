@@ -32,9 +32,14 @@
 
 ## Custom settings
 
-Add `ajilog.conf` to your project:
+Add `ajilog.conf` to your project.  
+The following is the default setting:
+
+    [stream]
+    color  = true
+    level  = debug
 
     [rotate]
-    enable = true
+    enable = false
     level  = debug
     dir    = /tmp/ajilog
