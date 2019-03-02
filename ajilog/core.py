@@ -26,10 +26,10 @@ class _Logger():
 
     colored_formatter = ColoredFormatter(
         (
-            '%(log_color)s%(levelname)-5s%(reset)s '
+            '%(log_color)s%(levelname)-8s%(reset)s '
             '%(yellow)s[%(asctime)s]%(reset)s%(white)s '
             '%(name)s %(funcName)s '
-            '%(bold_purple)s:%(lineno)d%(reset)s '
+            '%(bold_purple)s:%(lineno)3d%(reset)s '
             '%(log_color)s%(message)s%(reset)s'
         ),
         datefmt=datefmt,
@@ -47,22 +47,21 @@ class _Logger():
     def __init__(self, stream=None):
         """Create dict to store loggers."""
         logging.getLogger().setLevel(logging.DEBUG)
-        self._loggers = logging.Logger.manager.loggerDict
-        self._loggers.clear()  # clear all existed loggers
 
     def __getattr__(self, name):
         """Get attribute of self."""
         logger_name = self.get_current_name()
-        if not self._loggers.get(logger_name):
+        if not logging.Logger.manager.loggerDict.get(logger_name):
             self.set_stream()
             if settings.ROTATE_ENABLE:
                 self.set_rotate()
-        return getattr(self._loggers[logger_name], name)
+        return getattr(logging.Logger.manager.loggerDict[logger_name], name)
 
     def set_stream(self):
         """Set formatter and add handlers."""
         logger_name = self.get_current_name()
         _logger = logging.getLogger(logger_name)
+        _logger.propagate = False
 
         sh = logging.StreamHandler(self.stream)
         sh.setLevel(settings.STREAM_LEVEL)
@@ -82,23 +81,23 @@ class _Logger():
         )
         fh.setLevel(settings.ROTATE_LEVEL)
         fh.setFormatter(self.formatter)
-        logging.getLogger(logger_name).addHandler(fh)
+        _logger = logging.getLogger(logger_name)
+        _logger.propagate = False
+        _logger.addHandler(fh)
 
     def __repr__(self):
         """Make human-readable."""
-        return str(self._loggers)
+        return str(logging.Logger.manager.loggerDict)
 
     def get_current_name(self):
         """Get current file info."""
         frame = currentframe()
-        while True:
-            filepath = getfile(frame)
-            if __file__ == filepath:
-                frame = frame.f_back
-            else:
-                break
-        logger_name = frame.f_globals.get('__loggername__')
-        logger_name = logger_name or frame.f_globals['__name__']
+        while __file__ == getfile(frame):
+            frame = frame.f_back
+        if getfile(frame).endswith('__init__.py'):
+            frame = frame.f_back
+        logger_name = frame.f_globals.get(
+            '__loggername__', frame.f_globals['__name__'])
         return logger_name
 
 
