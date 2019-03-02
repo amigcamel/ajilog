@@ -14,4 +14,9 @@ if __name__ == '__main__':
         description='Wrapper for colorlog for better use.',
         author='Aji Liu',
         author_email='amigcamel@gmail.com',
+        entry_points={
+            'console_scripts': [
+                'ajilog = ajilog.cli:main'
+            ]
+        }
     )
