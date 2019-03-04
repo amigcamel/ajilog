@@ -4,25 +4,7 @@ import sys
 
 from colorlog import ColoredFormatter
 
-
-datefmt = '%y-%m-%d %H:%M:%S'
-colored_formatter = ColoredFormatter(
-    (
-        '%(log_color)s%(levelname)-8s%(reset)s '
-        '%(yellow)s[%(asctime)s]%(reset)s%(white)s '
-        '%(name)s %(funcName)s '
-        '%(bold_purple)s:%(lineno)3d%(reset)s '
-        '%(log_color)s%(message)s%(reset)s'
-    ),
-    datefmt=datefmt,
-    log_colors={
-        'DEBUG': 'blue',
-        'INFO': 'bold_cyan',
-        'WARNING': 'red,',
-        'ERROR': 'bg_bold_red',
-        'CRITICAL': 'red,bg_white',
-    }
-)
+from . import settings
 
 
 class AjiLogRecord(logging.LogRecord):
@@ -50,16 +32,15 @@ class AjiLogRecord(logging.LogRecord):
 logging._logRecordFactory = AjiLogRecord
 
 
-class initialize(logging.Logger):
-    """Logger object."""
+class initialize:
+    """Call this function to patch the default root logger."""
 
-    def __init__(self, *args, **kwargs):
-        """Create dict to store loggers."""
-        super().__init__(self, *args, **kwargs)
+    def __init__(self):
+        """Patch root loggers."""
         sh = logging.StreamHandler()
-        sh.setFormatter(colored_formatter)
-        logger = logging.getLogger()
-        logger.propagate = False
-        logger.setLevel(logging.DEBUG)
-        logger.addHandler(sh)
-        self.logger = logger
+        sh.setFormatter(ColoredFormatter(settings.LOG_FORMAT,
+                                         datefmt=settings.DATE_FORMAT,
+                                         log_colors=settings.LOG_COLORS))
+        logging.root.setLevel(logging.DEBUG)
+        logging.root.addHandler(sh)
+        logging.debug('ajilog initialized')
