@@ -1,8 +1,12 @@
 """Commandline utilities."""
 from io import StringIO
 import os.path
+import argparse
 import configparser
 import sys
+import json
+
+from ajilog import settings
 
 
 def _confirm(question, choices=None):
@@ -18,12 +22,9 @@ def _confirm(question, choices=None):
     return ans
 
 
-conf_name = 'ajilog.conf'
-
-
 def initialize():
     """Create a config file."""
-    if os.path.exists(conf_name):
+    if os.path.exists(settings.CONF_NAME):
         ans = _confirm('Conf already exists, do you want to override it')
         if ans is False:
             sys.exit(0)
@@ -58,7 +59,7 @@ def initialize():
     print('\nThis is your configurations:\n\n' + s.read())
     ans = _confirm('\nDo you want to save it?')
     if ans is True:
-        with open(conf_name, 'w') as f:
+        with open(settings.CONF_NAME, 'w') as f:
             config.write(f)
         print('Config save successfully!')
     else:
@@ -66,13 +67,34 @@ def initialize():
         sys.exit(0)
 
 
-def main():
-    """Execute main function."""
-    try:
-        initialize()
-    except KeyboardInterrupt:
-        print('\nAborted by user!')
+def gen(save=False):
+    """Generate default configurations.
+
+    :param save: write to file if save==True
+    """
+    s = json.dumps(settings.HANDLERS, indent=4)
+    print(s)
+    if save:
+        with open(settings.CONF_NAME, 'w') as f:
+            f.write(s)
+        print(settings.CONF_NAME, ' saved!')
 
 
 if __name__ == '__main__':
-    main()
+    try:
+        parser = argparse.ArgumentParser()
+        subparser = parser.add_subparsers(dest='command')
+        parser_init = subparser.add_parser('init')
+        parser_gen = subparser.add_parser('gen')
+        parser_gen.add_argument('--save', action='store_true')
+
+        args = vars(parser.parse_args())
+        command = args.pop('command')
+        if command == 'init':
+            initialize()
+        elif command == 'gen':
+            gen(**args)
+        else:
+            parser.print_help()
+    except KeyboardInterrupt:
+        print('\nAborted by user!')
