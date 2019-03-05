@@ -6,7 +6,7 @@ import configparser
 import sys
 import json
 
-from ajilog import settings
+from . import settings
 
 
 def _confirm(question, choices=None):
@@ -80,11 +80,12 @@ def gen(save=False):
         print(settings.CONF_NAME, ' saved!')
 
 
-if __name__ == '__main__':
+def main():
+    """Execute argparse."""
     try:
         parser = argparse.ArgumentParser()
         subparser = parser.add_subparsers(dest='command')
-        parser_init = subparser.add_parser('init')
+        subparser.add_parser('init')
         parser_gen = subparser.add_parser('gen')
         parser_gen.add_argument('--save', action='store_true')
 
@@ -98,3 +99,7 @@ if __name__ == '__main__':
             parser.print_help()
     except KeyboardInterrupt:
         print('\nAborted by user!')
+
+
+if __name__ == '__main__':
+    main()
