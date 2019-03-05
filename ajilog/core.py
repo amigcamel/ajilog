@@ -38,30 +38,78 @@ class initialize:
 
     def __init__(self):
         """Patch root loggers."""
-        # stream handler
-        sh = logging.StreamHandler()
-        sh.setFormatter(ColoredFormatter(
-            settings.STREAM['format'],
-            datefmt=settings.STREAM['datefmt'],
-            log_colors=settings.STREAM['log_colors']))
+        # set root logger level to DEBUG
         logging.root.setLevel(logging.DEBUG)
-        logging.root.addHandler(sh)
-
+        # stream handler
+        if settings.HANDLERS['STREAM']['enabled']:
+            StreamHandler(settings.HANDLERS['STREAM'])
         # file handler
-        fh = logging.FileHandler(settings.FILE['path'])
-        fh.setLevel(getattr(logging, settings.FILE['level']))
-        fh.setFormatter(logging.Formatter(
-            settings.FILE['format'], settings.FILE['datefmt']))
-        logging.root.addHandler(fh)
-
+        if settings.HANDLERS['FILE']['enabled']:
+            FileHandler(settings.HANDLERS['FILE'])
         # rotating file handler
-        trh = logging.handlers.TimedRotatingFileHandler(
-            settings.TIME_ROTATE['path'],
-            when=settings.TIME_ROTATE['when'],
-            backupCount=settings.TIME_ROTATE['backupCount'])
-        trh.setLevel(getattr(logging, settings.TIME_ROTATE['level']))
-        trh.setFormatter(logging.Formatter(
-            settings.TIME_ROTATE['format'], settings.TIME_ROTATE['datefmt']))
-        logging.root.addHandler(trh)
+        if settings.HANDLERS['TIME_ROTATE']['enabled']:
+            TimedRotatingFileHandler(settings.HANDLERS['TIME_ROTATE'])
 
-        logging.debug('ajilog initialized')
+
+class Handler:
+    """Logger handler."""
+
+    def __init__(self, params):
+        """Build logger."""
+        self.params = params
+        self.create_handler()
+        self.set_formatter()
+        self.set_level()
+        self.add_handler()
+        logging.root.debug('%s added' % self.handler)
+
+    def create_handler(self):
+        """Create logger handler."""
+        raise NotImplementedError
+
+    def set_level(self):
+        """Set log level."""
+        self.handler.setLevel(getattr(logging, self.params['level']))
+
+    def set_formatter(self):
+        """Set logger format."""
+        self.handler.setFormatter(logging.Formatter(
+            self.params['format'], self.params['datefmt']))
+
+    def add_handler(self):
+        """Add handler to logger."""
+        logging.root.addHandler(self.handler)
+
+
+class StreamHandler(Handler):
+    """Build logging.StreamHandler."""
+
+    def create_handler(self):
+        """Create logger handler."""
+        self.handler = logging.StreamHandler()
+
+    def set_formatter(self):
+        """Set logger format."""
+        self.handler.setFormatter(ColoredFormatter(
+            self.params['format'],
+            datefmt=self.params['datefmt'],
+            log_colors=self.params['log_colors']))
+
+
+class FileHandler(Handler):
+    """Build logging.FileHandler."""
+
+    def create_handler(self):
+        """Create logger handler."""
+        self.handler = logging.FileHandler(self.params['path'])
+
+
+class TimedRotatingFileHandler(Handler):
+    """Build logging.handlers.TimedRotatingFileHandler."""
+
+    def create_handler(self):
+        """Create handler."""
+        self.handler = logging.handlers.TimedRotatingFileHandler(
+            self.params['path'],
+            when=self.params['when'],
+            backupCount=self.params['backupCount'])
