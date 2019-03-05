@@ -33,8 +33,12 @@ class AjiLogRecord(logging.LogRecord):
 logging._logRecordFactory = AjiLogRecord
 
 
-def initialize():
+def initialize(**kwargs):
     """Call this function to patch the default root logger."""
+    # experimental feature: colorize Scrapy log
+    if kwargs.get('colorize_scrapy'):
+        import scrapy.utils.log
+        scrapy.utils.log._get_handler = lambda x: logging.NullHandler()
     # set root logger level to DEBUG
     logging.root.setLevel(logging.DEBUG)
     # stream handler
