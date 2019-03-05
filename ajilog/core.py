@@ -33,22 +33,19 @@ class AjiLogRecord(logging.LogRecord):
 logging._logRecordFactory = AjiLogRecord
 
 
-class initialize:
+def initialize():
     """Call this function to patch the default root logger."""
-
-    def __init__(self):
-        """Patch root loggers."""
-        # set root logger level to DEBUG
-        logging.root.setLevel(logging.DEBUG)
-        # stream handler
-        if settings.HANDLERS['STREAM']['enabled']:
-            StreamHandler(settings.HANDLERS['STREAM'])
-        # file handler
-        if settings.HANDLERS['FILE']['enabled']:
-            FileHandler(settings.HANDLERS['FILE'])
-        # rotating file handler
-        if settings.HANDLERS['TIME_ROTATE']['enabled']:
-            TimedRotatingFileHandler(settings.HANDLERS['TIME_ROTATE'])
+    # set root logger level to DEBUG
+    logging.root.setLevel(logging.DEBUG)
+    # stream handler
+    if settings.HANDLERS['STREAM']['enabled']:
+        StreamHandler(settings.HANDLERS['STREAM'])
+    # file handler
+    if settings.HANDLERS['FILE']['enabled']:
+        FileHandler(settings.HANDLERS['FILE'])
+    # rotating file handler
+    if settings.HANDLERS['TIME_ROTATE']['enabled']:
+        TimedRotatingFileHandler(settings.HANDLERS['TIME_ROTATE'])
 
 
 class Handler:
