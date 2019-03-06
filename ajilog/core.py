@@ -1,4 +1,5 @@
 """Logging configurations."""
+import inspect
 import logging
 import logging.handlers
 import sys
@@ -19,6 +20,10 @@ class AjiLogRecord(logging.LogRecord):
             frame = frame.f_back
         while frame.f_globals['__package__'] == 'logging':
             frame = frame.f_back
+        # experimental: _print
+        _print_replaced = inspect.getframeinfo(frame).function == '_print'
+        if _print_replaced:
+            frame = frame.f_back
         qualname = frame.f_globals['__name__']
         # TODO: add comments
         logging.Logger.manager.getLogger(qualname)
@@ -28,6 +33,9 @@ class AjiLogRecord(logging.LogRecord):
         patched_args.extend(args[1:])
         args = tuple(patched_args)
         super().__init__(*args, **kwargs)
+        # experimental: _print
+        if _print_replaced:
+            self.funcName = inspect.getframeinfo(frame).function
 
 
 logging._logRecordFactory = AjiLogRecord
@@ -39,6 +47,13 @@ def initialize(**kwargs):
     if kwargs.get('colorize_scrapy'):
         import scrapy.utils.log
         scrapy.utils.log._get_handler = lambda x: logging.NullHandler()
+    # experimental feature: replace `print` with `logging`
+    if kwargs.get('replace_print'):
+        import builtins
+
+        def _print(*_args, **_kwargs):
+            logging.root.debug(_kwargs.get('sep', '').join(_args))
+        builtins.print = _print
     # set root logger level to DEBUG
     logging.root.setLevel(logging.DEBUG)
     # stream handler
