@@ -8,6 +8,8 @@ from colorlog import ColoredFormatter
 
 from . import settings
 
+_initialized = False
+
 
 class AjiLogRecord(logging.LogRecord):
     """Custom LogRecord."""
@@ -44,6 +46,11 @@ logging._logRecordFactory = AjiLogRecord
 def initialize(**kwargs):
     """Call this function to patch the default root logger."""
     # experimental feature: colorize Scrapy log
+    global _initialized
+    if _initialized:
+        logging.debug('ajilog already initialized')
+        return
+
     if kwargs.get('colorize_scrapy'):
         import scrapy.utils.log
         scrapy.utils.log._get_handler = lambda x: logging.NullHandler()
@@ -65,6 +72,8 @@ def initialize(**kwargs):
     # rotating file handler
     if settings.HANDLERS['TIME_ROTATE']['enabled']:
         TimedRotatingFileHandler(settings.HANDLERS['TIME_ROTATE'])
+
+    _initialized = True
 
 
 class Handler:
