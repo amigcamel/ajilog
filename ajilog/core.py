@@ -62,6 +62,7 @@ def initialize(**kwargs):
             logging.root.debug(_kwargs.get('sep', '').join(_args))
         builtins.print = _print
     # set root logger level to DEBUG
+    logging.root = logging.getLogger('ajilog')
     logging.root.setLevel(logging.DEBUG)
     # stream handler
     if settings.HANDLERS['STREAM']['enabled']:
