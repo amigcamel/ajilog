@@ -45,15 +45,11 @@ logging._logRecordFactory = AjiLogRecord
 
 def initialize(**kwargs):
     """Call this function to patch the default root logger."""
-    # experimental feature: colorize Scrapy log
     global _initialized
     if _initialized:
         logging.debug('ajilog already initialized')
         return
 
-    if kwargs.get('colorize_scrapy'):
-        import scrapy.utils.log
-        scrapy.utils.log._get_handler = lambda x: logging.NullHandler()
     # experimental feature: replace `print` with `logging`
     if kwargs.get('replace_print'):
         import builtins
@@ -66,13 +62,18 @@ def initialize(**kwargs):
     logging.root.setLevel(logging.DEBUG)
     # stream handler
     if settings.HANDLERS['STREAM']['enabled']:
-        StreamHandler(settings.HANDLERS['STREAM'])
+        st = StreamHandler(settings.HANDLERS['STREAM'])
     # file handler
     if settings.HANDLERS['FILE']['enabled']:
         FileHandler(settings.HANDLERS['FILE'])
     # rotating file handler
     if settings.HANDLERS['TIME_ROTATE']['enabled']:
         TimedRotatingFileHandler(settings.HANDLERS['TIME_ROTATE'])
+
+    # experimental feature: colorize Scrapy log
+    if kwargs.get('colorize_scrapy'):
+        import scrapy.utils.log
+        scrapy.utils.log._get_handler = lambda x: st.handler
 
     _initialized = True
 
