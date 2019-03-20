@@ -14,7 +14,7 @@ HANDLERS = {
         'log_colors': {
             'DEBUG': 'blue',
             'INFO': 'bold_cyan',
-            'WARNING': 'red,',
+            'WARNING': 'blue,red,',
             'ERROR': 'bg_bold_red',
             'CRITICAL': 'red,bg_white',
         }
