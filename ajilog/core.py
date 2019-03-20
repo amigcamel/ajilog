@@ -58,7 +58,11 @@ def initialize(**kwargs):
             logging.root.debug(_kwargs.get('sep', '').join(_args))
         builtins.print = _print
     # set root logger level to DEBUG
-    logging.root = logging.getLogger('ajilog')
+    if kwargs.get('colorize_scrapy'):
+        root_logger_name = ''
+    else:
+        root_logger_name = 'ajilog'
+    logging.root = logging.getLogger(root_logger_name)
     logging.root.setLevel(logging.DEBUG)
     # stream handler
     if settings.HANDLERS['STREAM']['enabled']:
